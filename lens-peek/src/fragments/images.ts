@@ -1,6 +1,7 @@
 import { graphql } from "@lens-protocol/client";
 
-export const MediaImageFragment = graphql(
+// export const MediaImageFragment = graphql(
+const MediaImageFragment = graphql(
   `
     fragment MediaImage on MediaImage {
       __typename
