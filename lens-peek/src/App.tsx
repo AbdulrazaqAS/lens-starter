@@ -11,6 +11,7 @@ import type { SessionClient } from "@lens-protocol/client";
 
 const TESTNET_APP = "0xC75A89145d765c396fd75CbD16380Eb184Bd2ca7";
 
+// Read Authentication > Advanced > Authentication Tokens: To authenticated your app's users
 // TODO: Is account needed, walletClient has account inside
 const App = () => {
   const account = useAccount();
@@ -19,13 +20,32 @@ const App = () => {
     null
   );
 
-  async function setupClient() {
+  async function setupOnboardingClient() {
     if (!walletClient || !account.isConnected || sessionClient) return;
 
     const authenticated = await client.login({
       onboardingUser: {
         app: TESTNET_APP,
         wallet: walletClient.account.address,
+      },
+      signMessage: signMessageWith(walletClient),
+    });
+
+    if (authenticated.isErr()) {
+      console.error(authenticated.error);
+      return;
+    }
+
+    setSessionClient(authenticated.value);
+    console.log("Address Authenticated");
+  }
+
+  async function setupBuilderClient() {
+    if (!walletClient || !account.isConnected || sessionClient) return;
+
+    const authenticated = await client.login({
+      builder: {
+        address: walletClient.account.address,
       },
       signMessage: signMessageWith(walletClient),
     });
@@ -82,11 +102,11 @@ const App = () => {
   useEffect(() => {
     if (walletClient && account.isConnected && !sessionClient) {
       console.log("Setting up client");
-      setupClient();
+      // setupClient();
     }
 
-    listConnectedAddressAccounts();
-    getLastLoggedInAccount();
+    // listConnectedAddressAccounts();
+    // getLastLoggedInAccount();
 
     const info = {
       IsConnected: account.isConnected,
