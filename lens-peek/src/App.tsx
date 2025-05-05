@@ -3,10 +3,13 @@ import { useEffect, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 import { signMessageWith } from "@lens-protocol/client/viem";
 import { client } from "./utils/client";
+import { evmAddress } from "@lens-protocol/client";
+import { fetchAccountsAvailable } from "@lens-protocol/client/actions";
 import type { SessionClient } from "@lens-protocol/client";
 
 const TESTNET_APP = "0xC75A89145d765c396fd75CbD16380Eb184Bd2ca7";
 
+// TODO: Is account needed, walletClient has account inside
 const App = () => {
   const account = useAccount();
   const { data: walletClient } = useWalletClient();
@@ -35,6 +38,20 @@ const App = () => {
     console.log("Address Authenticated");
   }
 
+  async function listConnectedAddressAccounts() {
+    if (!client || !walletClient) {
+      console.error("Listing available accounts not ready");
+      return;
+    }
+
+    const result = await fetchAccountsAvailable(client, {
+      managedBy: evmAddress(walletClient.account.address),
+      includeOwned: true,
+    });
+    console.log("Result", result);
+    return result;
+  }
+
   // useEffect(() => {
   //   setupClient();
   // }, [walletClient]);
@@ -44,6 +61,8 @@ const App = () => {
       console.log("Setting up client");
       setupClient();
     }
+
+    const accounts = listConnectedAddressAccounts();
 
     const info = {
       IsConnected: account.isConnected,
