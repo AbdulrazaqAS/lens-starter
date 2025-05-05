@@ -1,10 +1,10 @@
 import { PublicClient, testnet } from "@lens-protocol/client";
 
-import { fragments } from "./fragments";
+import { fragments } from "../fragments";
 
 export const client = PublicClient.create({
   environment: testnet,
-  fragments,
+  // fragments,
   //origin: "https://myappdomain.xyz",
   //apiKey: "<SERVER-API-KEY>",  // to increase rate limit in server to server call
 });
