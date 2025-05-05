@@ -1,5 +1,7 @@
 import { MetadataAttributeType, app } from "@lens-protocol/metadata";
-import { storageClient } from "@lens-protocol/client/test-utils";
+import { storageClient } from "./storage-client";
+import { immutable } from "@lens-chain/storage-client";
+import { chains } from "@lens-chain/sdk/viem";
 
 const metadata = app({
   name: "LensJobs",
@@ -9,4 +11,9 @@ const metadata = app({
   platforms: ["web", "ios", "android"],
 });
 
-const { uri } = storageClient.create;
+const resource = await storageClient.upload(metadata, {
+  acl: immutable(chains.testnet.id),
+});
+
+console.log("Resource:", resource);
+console.log("App URI:", resource.uri);
