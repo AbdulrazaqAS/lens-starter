@@ -20,7 +20,6 @@ const App = () => {
   );
 
   async function setupClient() {
-    // if (!walletClient || !account.isConnected) return;
     if (!walletClient || !account.isConnected || sessionClient) return;
 
     const authenticated = await client.login({
@@ -80,17 +79,14 @@ const App = () => {
     return result;
   }
 
-  // useEffect(() => {
-  //   setupClient();
-  // }, [walletClient]);
-
   useEffect(() => {
     if (walletClient && account.isConnected && !sessionClient) {
       console.log("Setting up client");
       setupClient();
     }
 
-    const accounts = listConnectedAddressAccounts(); // Promise
+    listConnectedAddressAccounts();
+    getLastLoggedInAccount();
 
     const info = {
       IsConnected: account.isConnected,
@@ -99,12 +95,6 @@ const App = () => {
     };
     console.log(info);
   }, [walletClient, account.isConnected, sessionClient]);
-
-  // useEffect(() => {
-  //   console.log("Account:", walletClient?.account.address);
-  //   console.log("WalletClient", walletClient);
-  //   setupLensClient();
-  // }, [account, walletClient]);
 
   return (
     <div>
