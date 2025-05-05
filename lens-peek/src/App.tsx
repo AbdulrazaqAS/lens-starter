@@ -3,17 +3,20 @@ import { useEffect, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 import { signMessageWith } from "@lens-protocol/client/viem";
 import { client } from "./utils/client";
+import type { SessionClient } from "@lens-protocol/client";
 
 const TESTNET_APP = "0xC75A89145d765c396fd75CbD16380Eb184Bd2ca7";
 
 const App = () => {
-  // const account = useAccount();
+  const account = useAccount();
   const { data: walletClient } = useWalletClient();
-  const [sessionClient, setSessionClient] = useState(null);
+  const [sessionClient, setSessionClient] = useState<SessionClient | null>(
+    null
+  );
 
   async function setupClient() {
     // if (!walletClient || !account.isConnected) return;
-    if (!walletClient) return;
+    if (!walletClient || !account.isConnected || sessionClient) return;
 
     const authenticated = await client.login({
       onboardingUser: {
@@ -29,12 +32,26 @@ const App = () => {
     }
 
     setSessionClient(authenticated.value);
-    console.log("Authenticated wallet");
+    console.log("Address Authenticated");
   }
 
+  // useEffect(() => {
+  //   setupClient();
+  // }, [walletClient]);
+
   useEffect(() => {
-    setupClient();
-  }, [walletClient]);
+    if (walletClient && account.isConnected && !sessionClient) {
+      console.log("Setting up client");
+      setupClient();
+    }
+
+    const info = {
+      IsConnected: account.isConnected,
+      HasWalletClient: Boolean(walletClient),
+      HasSessionClient: Boolean(sessionClient),
+    };
+    console.log(info);
+  }, [walletClient, account.isConnected, sessionClient]);
 
   // useEffect(() => {
   //   console.log("Account:", walletClient?.account.address);
@@ -45,10 +62,10 @@ const App = () => {
   return (
     <div>
       <ConnectKitButton />
-      {/* <p>
+      <p>
         Status: {account.status} {account.address} {account.chain?.name}{" "}
         {account.chainId}
-      </p> */}
+      </p>
     </div>
   );
 };
