@@ -5,6 +5,8 @@ import { signMessageWith } from "@lens-protocol/client/viem";
 import { client } from "./utils/client";
 import { evmAddress } from "@lens-protocol/client";
 import { fetchAccountsAvailable } from "@lens-protocol/client/actions";
+import { lastLoggedInAccount } from "@lens-protocol/client/actions";
+
 import type { SessionClient } from "@lens-protocol/client";
 
 const TESTNET_APP = "0xC75A89145d765c396fd75CbD16380Eb184Bd2ca7";
@@ -48,7 +50,33 @@ const App = () => {
       managedBy: evmAddress(walletClient.account.address),
       includeOwned: true,
     });
-    console.log("Result", result);
+    console.log("Connected Address Accounts", result);
+    return result;
+  }
+
+  async function logOutAuthenticatedSession() {
+    // It says client has no logout, but may .mutation can be used together with GraphQL command.
+    // Check log out in Authentication page
+    // const result = await client.logout();
+  }
+
+  async function getLastLoggedInAccount() {
+    if (!walletClient || !client) {
+      console.error("Getting last logged in account not ready");
+      return;
+    }
+
+    const result = await lastLoggedInAccount(client, {
+      address: evmAddress(walletClient!.account!.address),
+      // app: evmAddress{TESTNET_APP}  // Specific app, omit for all apps
+    });
+
+    if (result.isErr()) {
+      console.error("Error getting last logged in account:", result.error);
+      return;
+    }
+    console.log("Last logged in account", result);
+
     return result;
   }
 
@@ -62,7 +90,7 @@ const App = () => {
       setupClient();
     }
 
-    const accounts = listConnectedAddressAccounts();
+    const accounts = listConnectedAddressAccounts(); // Promise
 
     const info = {
       IsConnected: account.isConnected,
