@@ -115,7 +115,7 @@ const App = () => {
           <p>Description {app.metadata.description}</p>
           <p>Developer {app.metadata.developer}</p>
           <p>Name {app.metadata.name}</p>
-          <p>Platforms {app.metadata.platforms}</p>
+          <p>Platforms {app.metadata.platforms.join(", ")}</p>
           <p>Tagline {app.metadata.tagline}</p>
           <p>Url {app.metadata.url}</p>
           <p>NamespaceAddress {app.namespaceAddress}</p>
@@ -127,7 +127,7 @@ const App = () => {
       )}
       {users.length > 0 && (
         <ol>
-          users.map((item, idx) => (
+          users.map(function(item, idx)(
             <li key={idx}>
               {item.account} {item.lastActiveOn} {item.firstLoginOn}
             </li>
