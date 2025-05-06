@@ -8,6 +8,7 @@ const metadata = app({
   tagline: "Lens Protocol Freelance site",
   description: "Platform for freelancers and hirers",
   developer: "AdulrazaqAS <abdulrazaq2621@gmail.com>",
+  url: "https://crowdfunding-nu-two.vercel.app/",
   platforms: ["web", "ios", "android"],
 });
 
