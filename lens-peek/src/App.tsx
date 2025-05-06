@@ -1,12 +1,12 @@
 import { ConnectKitButton } from "connectkit";
 import { useEffect, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
-import { signMessageWith } from "@lens-protocol/client/viem";
-import { client } from "./utils/client";
+
 import { evmAddress } from "@lens-protocol/client";
-import { fetchAccountsAvailable } from "@lens-protocol/client/actions";
-import { lastLoggedInAccount } from "@lens-protocol/client/actions";
+import { lastLoggedInAccount, fetchAccountsAvailable } from "@lens-protocol/client/actions";
+
 import {setupOnboardingUser} from "./utils/users";
+import { client } from "./utils/client";
 import { fetchAppByTxHash, fetchAllUsers } from "./utils/app";
 
 import type { SessionClient } from "@lens-protocol/client";
@@ -23,9 +23,12 @@ const admins = [
 const App = () => {
   const account = useAccount();
   const { data: walletClient } = useWalletClient();
+
+  const [app, setApp] = useState<Object>({});
+  const [users, setUsers] = useState<Array<Object>>([]);
   const [sessionClient, setSessionClient] = useState<SessionClient | null>(
     null
-  );
+  );  // TODO: Use the storage something
 
   async function listConnectedAddressAccounts() {
     if (!client || !walletClient) {
@@ -74,7 +77,7 @@ const App = () => {
       // setupOnboardingUser({client, walletClient}).then(async () => {
       //   console.log("Session client loaded");
       // });
-      listConnectedAddressAccounts();
+      // listConnectedAddressAccounts();
     // getLastLoggedInAccount();
 
     const info = {
@@ -86,10 +89,15 @@ const App = () => {
   }, [walletClient, account.isConnected, sessionClient]);
 
   useEffect(() => {
-    fetchAppByTxHash(client).then(console.log);
+    fetchAppByTxHash(client).then((app) => {
+      console.log("App", app);
+      setApp(app);
+    });
+
     fetchAllUsers(client).then((result) => {
       // items: Array<AppUser>: [{account: Account, lastActiveOn: DateTime, firstLoginOn: DateTime}, …]
       const { items, pageInfo } = result;
+      setUsers(items);
       console.log("All users:", items);
     });
   }, []);
@@ -97,10 +105,35 @@ const App = () => {
   return (
     <div>
       <ConnectKitButton />
-      <p>
-        Status: {account.status} {account.address} {account.chain?.name}{" "}
-        {account.chainId}
-      </p>
+      {app.address && (
+        <div>
+          <p>Address {app.address}</p>
+          <p>CreatedAt {app.createdAt}</p>
+          <p>DefaultFeedAddress {app.defaultFeedAddress}</p>
+          <p>GraphAddress {app.graphAddress}</p>
+          <p>HasAuthorizationEndpoint {app.hasAuthorizationEndpoint}</p>
+          <p>Description {app.metadata.description}</p>
+          <p>Developer {app.metadata.developer}</p>
+          <p>Name {app.metadata.name}</p>
+          <p>Platforms {app.metadata.platforms}</p>
+          <p>Tagline {app.metadata.tagline}</p>
+          <p>Url {app.metadata.url}</p>
+          <p>NamespaceAddress {app.namespaceAddress}</p>
+          <p>Owner {app.owner}</p>
+          <p>SponsorshipAddress {app.sponsorshipAddress}</p>
+          <p>TreasuryAddress {app.treasuryAddress}</p>
+          <p>VerificationEnabled {app.verificationEnabled}</p>
+        </div>
+      )}
+      {users.length > 0 && (
+        <ol>
+          users.map((item, idx) => (
+            <li key={idx}>
+              {item.account} {item.lastActiveOn} {item.firstLoginOn}
+            </li>
+          ))
+        </ol>
+      )}
     </div>
   );
 };
