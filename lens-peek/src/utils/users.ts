@@ -1,10 +1,11 @@
 import { PublicClient } from "@lens-protocol/client";
 import { WalletClient } from "viem";
 import { signMessageWith } from "@lens-protocol/client/viem";
+import { evmAddress } from "@lens-protocol/client";
 
 const APP_ADDRESS = import.meta.env.VITE_APP_ADDRESS;
 
-async function setupOnboardingUser({
+export async function setupOnboardingUser({
   client,
   walletClient,
 }: {
@@ -13,8 +14,8 @@ async function setupOnboardingUser({
 }) {
   const authenticated = await client.login({
     onboardingUser: {
-      app: APP_ADDRESS,
-      wallet: walletClient.account!.address,
+      app: evmAddress(APP_ADDRESS),
+      wallet: evmAddress(walletClient.account!.address),
     },
     signMessage: signMessageWith(walletClient),
   });
@@ -28,7 +29,7 @@ async function setupOnboardingUser({
   return authenticated.value;
 }
 
-async function setupBuilderUser({
+export async function setupBuilderUser({
   client,
   walletClient,
 }: {
@@ -51,7 +52,7 @@ async function setupBuilderUser({
   return authenticated.value;
 }
 
-async function setupAccountOwnerUser({
+export async function setupAccountOwnerUser({
   client,
   walletClient,
   account
@@ -77,7 +78,7 @@ async function setupAccountOwnerUser({
   return authenticated.value;
 }
 
-async function setupAccountManagerUser({
+export async function setupAccountManagerUser({
   client,
   walletClient,
   account

@@ -6,6 +6,8 @@ import { client } from "./utils/client";
 import { evmAddress } from "@lens-protocol/client";
 import { fetchAccountsAvailable } from "@lens-protocol/client/actions";
 import { lastLoggedInAccount } from "@lens-protocol/client/actions";
+import {setupOnboardingUser} from "./utils/users";
+import { fetchAppByTxHash } from "./utils/app";
 
 import type { SessionClient } from "@lens-protocol/client";
 
@@ -25,48 +27,9 @@ const App = () => {
     null
   );
 
-  async function setupOnboardingClient() {
-    if (!walletClient || !account.isConnected || sessionClient) return;
-
-    const authenticated = await client.login({
-      onboardingUser: {
-        app: TESTNET_APP,
-        wallet: walletClient.account.address,
-      },
-      signMessage: signMessageWith(walletClient),
-    });
-
-    if (authenticated.isErr()) {
-      console.error(authenticated.error);
-      return;
-    }
-
-    setSessionClient(authenticated.value);
-    console.log("Address Authenticated");
-  }
-
-  async function setupBuilderClient() {
-    if (!walletClient || !account.isConnected || sessionClient) return;
-
-    const authenticated = await client.login({
-      builder: {
-        address: walletClient.account.address,
-      },
-      signMessage: signMessageWith(walletClient),
-    });
-
-    if (authenticated.isErr()) {
-      console.error(authenticated.error);
-      return;
-    }
-
-    setSessionClient(authenticated.value);
-    console.log("Address Authenticated");
-  }
-
   async function listConnectedAddressAccounts() {
     if (!client || !walletClient) {
-      console.error("Listing available accounts not ready");
+      // console.error("Listing available accounts not ready");
       return;
     }
 
@@ -86,7 +49,7 @@ const App = () => {
 
   async function getLastLoggedInAccount() {
     if (!walletClient || !client) {
-      console.error("Getting last logged in account not ready");
+      // console.error("Getting last logged in account not ready");
       return;
     }
 
@@ -105,13 +68,14 @@ const App = () => {
   }
 
   useEffect(() => {
-    if (walletClient && account.isConnected && !sessionClient) {
-      setupBuilderClient().then(async () => {
-        console.log("Session client loaded");
-      });
-    }
+    if (!walletClient || !account.isConnected || sessionClient) return;
 
-    // listConnectedAddressAccounts();
+      // setupOnboardingUser({client, walletClient}).then(async () => {
+      //   console.log("Session client loaded");
+      // });
+
+    fetchAppByTxHash(client).then(console.log);
+    listConnectedAddressAccounts();
     // getLastLoggedInAccount();
 
     const info = {
