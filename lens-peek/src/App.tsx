@@ -70,6 +70,21 @@ const App = () => {
     return result;
   }
 
+  async function handleSignup(){
+    if (!client || !walletClient){
+      console.error("Error handling signup");
+      return;
+    }
+    
+    try {
+      cosnt user = await setupOnboardingUser({cleint, walletClient});
+      if (user) setSessionClient(user);  // error handled in the func
+    } catch (error) {
+      console.error("Error handling signup:", error);
+      return;
+    }
+  }
+
   useEffect(() => {
     // if (!walletClient || !account.isConnected || sessionClient) return;
     if (!walletClient || !account.isConnected) return;
@@ -105,6 +120,7 @@ const App = () => {
   return (
     <div>
       <ConnectKitButton />
+      <button onClick={}>Signup</button>
       {app.address && (
         <div>
           <p>Address {app.address}</p>
@@ -120,9 +136,9 @@ const App = () => {
           <p>Url {app.metadata.url}</p>
           <p>NamespaceAddress {app.namespaceAddress}</p>
           <p>Owner {app.owner}</p>
-          <p>SponsorshipAddress {app.sponsorshipAddress}</p>
-          <p>TreasuryAddress {app.treasuryAddress}</p>
-          <p>VerificationEnabled {app.verificationEnabled}</p>
+          <p>SponsorshipAddress {app.sponsorshipAddress | "Null"}</p>
+          <p>TreasuryAddress {app.treasuryAddress | "Null"}</p>
+          <p>VerificationEnabled {Boolean(app.verificationEnabled)}</p>
         </div>
       )}
       {users.length > 0 && (
