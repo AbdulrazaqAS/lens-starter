@@ -4,7 +4,7 @@ import { signMessageWith } from "@lens-protocol/client/viem";
 
 const APP_ADDRESS = import.meta.env.VITE_APP_ADDRESS;
 
-async function setupOnboardingClient({
+async function setupOnboardingUser({
   client,
   walletClient,
 }: {
@@ -24,16 +24,20 @@ async function setupOnboardingClient({
     return;
   }
 
-  setSessionClient(authenticated.value);
-  console.log("Address Authenticated");
+  console.log("Onboarding user authenticated");
+  return authenticated.value;
 }
 
-async function setupBuilderClient() {
-  if (!walletClient || !account.isConnected || sessionClient) return;
-
+async function setupBuilderUser({
+  client,
+  walletClient,
+}: {
+  client: PublicClient;
+  walletClient: WalletClient;
+}) {
   const authenticated = await client.login({
     builder: {
-      address: walletClient.account.address,
+      address: walletClient.account!.address,
     },
     signMessage: signMessageWith(walletClient),
   });
@@ -43,6 +47,58 @@ async function setupBuilderClient() {
     return;
   }
 
-  setSessionClient(authenticated.value);
-  console.log("Address Authenticated");
+  console.log("Builder user authenticated");
+  return authenticated.value;
+}
+
+async function setupAccountOwnerUser({
+  client,
+  walletClient,
+  account
+}: {
+  client: PublicClient;
+  walletClient: WalletClient;
+}) {
+  const authenticated = await client.login({
+    accountOwner: {
+      account: account,
+      app: APP_ADDRESS,
+      owner: walletClient.account!.address,
+    },
+    signMessage: signMessageWith(walletClient),
+  });
+
+  if (authenticated.isErr()) {
+    console.error(authenticated.error);
+    return;
+  }
+
+  console.log("Account owner user authenticated");
+  return authenticated.value;
+}
+
+async function setupAccountManagerUser({
+  client,
+  walletClient,
+  account
+}: {
+  client: PublicClient;
+  walletClient: WalletClient;
+}) {
+  const authenticated = await client.login({
+    accountManager: {
+      account: account,
+      app: APP_ADDRESS,
+      manager: walletClient.account!.address,
+    },
+    signMessage: signMessageWith(walletClient),
+  });
+
+  if (authenticated.isErr()) {
+    console.error(authenticated.error);
+    return;
+  }
+
+  console.log("Account manager user authenticated");
+  return authenticated.value;
 }
