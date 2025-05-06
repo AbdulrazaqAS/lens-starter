@@ -7,7 +7,7 @@ import { evmAddress } from "@lens-protocol/client";
 import { fetchAccountsAvailable } from "@lens-protocol/client/actions";
 import { lastLoggedInAccount } from "@lens-protocol/client/actions";
 import {setupOnboardingUser} from "./utils/users";
-import { fetchAppByTxHash } from "./utils/app";
+import { fetchAppByTxHash, fetchAllUsers } from "./utils/app";
 
 import type { SessionClient } from "@lens-protocol/client";
 
@@ -37,8 +37,8 @@ const App = () => {
       managedBy: evmAddress(walletClient.account.address),
       includeOwned: true,
     });
-    console.log("Connected Address Accounts", result);
-    return result;
+    console.log("Connected Address Accounts", result.value);
+    return result.value;
   }
 
   async function logOutAuthenticatedSession() {
@@ -68,14 +68,13 @@ const App = () => {
   }
 
   useEffect(() => {
-    if (!walletClient || !account.isConnected || sessionClient) return;
+    // if (!walletClient || !account.isConnected || sessionClient) return;
+    if (!walletClient || !account.isConnected) return;
 
       // setupOnboardingUser({client, walletClient}).then(async () => {
       //   console.log("Session client loaded");
       // });
-
-    fetchAppByTxHash(client).then(console.log);
-    listConnectedAddressAccounts();
+      listConnectedAddressAccounts();
     // getLastLoggedInAccount();
 
     const info = {
@@ -85,6 +84,15 @@ const App = () => {
     };
     console.log(info);
   }, [walletClient, account.isConnected, sessionClient]);
+
+  useEffect(() => {
+    fetchAppByTxHash(client).then(console.log);
+    fetchAllUsers(client).then((result) => {
+      // items: Array<AppUser>: [{account: Account, lastActiveOn: DateTime, firstLoginOn: DateTime}, …]
+      const { items, pageInfo } = result;
+      console.log("All users:", items);
+    });
+  }, []);
 
   return (
     <div>
