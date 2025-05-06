@@ -11,6 +11,8 @@ import { createApp } from "./utils/createApp";
 import type { SessionClient } from "@lens-protocol/client";
 
 const TESTNET_APP = "0xC75A89145d765c396fd75CbD16380Eb184Bd2ca7";
+const uri =
+  "lens://50efa5c55fb75422540b9227067c97f706bfeeb3e1e46d24e322873a1f493450";
 
 // Read Authentication > Advanced > Authentication Tokens: To authenticated your app's users
 // TODO: Is account needed, walletClient has account inside
@@ -104,11 +106,11 @@ const App = () => {
   useEffect(() => {
     if (walletClient && account.isConnected && !sessionClient) {
       console.log("Setting up client");
-      setupBuilderClient().then(async () => {
-        const resource = await createApp();
-        setAppUri(resource.uri);
-        console.log("Reosurce", resource);
-      });
+      // setupBuilderClient().then(async () => {
+      //   const resource = await createApp();
+      //   setAppUri(resource.uri);
+      //   console.log("Reosurce", resource);
+      // });
     }
 
     // listConnectedAddressAccounts();

@@ -13,7 +13,7 @@ const metadata = app({
 });
 
 export async function createApp() {
-  const resource = await storageClient.upload(metadata, {
+  const resource = await storageClient.uploadAsJson(metadata, {
     acl: immutable(chains.testnet.id),
   });
 
