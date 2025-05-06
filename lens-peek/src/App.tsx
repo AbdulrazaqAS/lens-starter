@@ -6,6 +6,7 @@ import { client } from "./utils/client";
 import { evmAddress } from "@lens-protocol/client";
 import { fetchAccountsAvailable } from "@lens-protocol/client/actions";
 import { lastLoggedInAccount } from "@lens-protocol/client/actions";
+import { createApp } from "./utils/createApp";
 
 import type { SessionClient } from "@lens-protocol/client";
 
@@ -19,6 +20,7 @@ const App = () => {
   const [sessionClient, setSessionClient] = useState<SessionClient | null>(
     null
   );
+  const [appUri, setAppUri] = useState("");
 
   async function setupOnboardingClient() {
     if (!walletClient || !account.isConnected || sessionClient) return;
@@ -102,7 +104,11 @@ const App = () => {
   useEffect(() => {
     if (walletClient && account.isConnected && !sessionClient) {
       console.log("Setting up client");
-      // setupClient();
+      setupBuilderClient().then(async () => {
+        const resource = await createApp();
+        setAppUri(resource.uri);
+        console.log("Reosurce", resource);
+      });
     }
 
     // listConnectedAddressAccounts();
@@ -123,6 +129,7 @@ const App = () => {
         Status: {account.status} {account.address} {account.chain?.name}{" "}
         {account.chainId}
       </p>
+      <p>App URI: {appUri}</p>
     </div>
   );
 };

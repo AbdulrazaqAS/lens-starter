@@ -11,9 +11,12 @@ const metadata = app({
   platforms: ["web", "ios", "android"],
 });
 
-const resource = await storageClient.upload(metadata, {
-  acl: immutable(chains.testnet.id),
-});
+export async function createApp() {
+  const resource = await storageClient.upload(metadata, {
+    acl: immutable(chains.testnet.id),
+  });
 
-console.log("Resource:", resource);
-console.log("App URI:", resource.uri);
+  console.log("Resource:", resource);
+  console.log("App URI:", resource.uri);
+  return resource;
+}
