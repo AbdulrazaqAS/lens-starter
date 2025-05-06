@@ -9,7 +9,7 @@ import { lastLoggedInAccount } from "@lens-protocol/client/actions";
 import { createAndUploadAppMetadata } from "./utils/createAndUploadAppMetadata";
 import { deployApp } from "./utils/deployApp";
 
-import type { SessionClient } from "@lens-protocol/client";
+import type { SessionClient, TxHash } from "@lens-protocol/client";
 
 const TESTNET_APP = "0xC75A89145d765c396fd75CbD16380Eb184Bd2ca7";
 const uri =
@@ -18,6 +18,8 @@ const admins = [
   "0xDaaE14a470e36796ADf9c75766D3d8ADD0a3D94c",
   "0x09938A51D5AF9c3ee0262865dba74F78DCFC99a6",
 ];
+const LensJobs_Addr =
+  "0x52751045ae69efa6aef68182bc3c046f02ff2c7bcf82ee0b9f6b7fa9e3eae5c7";
 
 // Read Authentication > Advanced > Authentication Tokens: To authenticated your app's users
 // TODO: Is account needed, walletClient has account inside
@@ -110,17 +112,11 @@ const App = () => {
 
   useEffect(() => {
     if (walletClient && account.isConnected && !sessionClient) {
-      console.log("Setting up client");
-      // setupBuilderClient().then(async () => {
-      //   const resource = await createAndUploadAppMetadata();
-      //   setAppUri(resource.uri);
-      //   console.log("Reosurce", resource);
-      // });
-
-      const result = deployApp({
-        admins,
-        sessionClient: sessionClient!,
-        metadataUri: uri,
+      setupBuilderClient().then(async () => {
+        console.log("Session client loaded");
+        //   const resource = await createAndUploadAppMetadata();
+        //   setAppUri(resource.uri);
+        //   console.log("Reosurce", resource);
       });
     }
 
@@ -134,6 +130,19 @@ const App = () => {
     };
     console.log(info);
   }, [walletClient, account.isConnected, sessionClient]);
+
+  useEffect(() => {
+    if (!sessionClient || !walletClient) return;
+
+    const address = deployApp({
+      admins,
+      sessionClient: sessionClient!,
+      metadataUri: uri,
+      walletClient: walletClient,
+    }).then((addr: TxHash | null) => {
+      console.log("Address", addr);
+    });
+  }, [sessionClient]);
 
   return (
     <div>

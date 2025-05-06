@@ -1,6 +1,7 @@
 import { SessionClient, evmAddress, uri } from "@lens-protocol/client";
 import { createApp } from "@lens-protocol/client/actions";
 import { handleOperationWith } from "@lens-protocol/client/viem";
+import { WalletClient } from "viem";
 
 export async function deployApp({
   admins,
@@ -11,6 +12,7 @@ export async function deployApp({
   admins: Array<string>;
   sessionClient: SessionClient;
   metadataUri: string;
+  walletClient: WalletClient;
 }) {
   const config = {
     admins: admins.map(evmAddress),
