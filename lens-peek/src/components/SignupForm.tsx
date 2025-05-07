@@ -1,50 +1,57 @@
 import { useState } from "react";
+import { AccountMetadata, account } from "@lens-protocol/metadata";
+import { storageClient } from "../utils/storage-client";
+import { immutable } from "@lens-chain/storage-client";
+import { chains } from "@lens-chain/sdk/viem";
+import { updateAccountMetadata } from "../utils/account";
+import { SessionClient } from "@lens-protocol/client";
+import { WalletClient } from "viem";
 
-type MetadataAttributeType = "STRING" | "DATE" | "BOOLEAN" | "NUMBER" | "JSON";
-
-interface Attribute {
-  key: string;
-  type: MetadataAttributeType;
-  value: string;
-}
-
-export default function SignupForm() {
+export default function SignupForm({
+  walletClient,
+  onboardingUserSessionClient,
+}: {
+  walletClient: WalletClient;
+  onboardingUserSessionClient: SessionClient;
+}) {
   const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
   const [picture, setPicture] = useState("");
   const [coverPicture, setCoverPicture] = useState("");
-  const [attributes, setAttributes] = useState<Attribute[]>([
-    { key: "twitter", type: "STRING", value: "https://twitter.com/" },
-    { key: "linkedin", type: "STRING", value: "https://linkedin.com/in/" },
-    { key: "dob", type: "DATE", value: "" },
-    { key: "settings", type: "JSON", value: '{"theme": "dark"}' },
-  ]);
 
-  const handleAttributeChange = (index: number, value: string) => {
-    const newAttributes = [...attributes];
-    newAttributes[index]["value"] = value;
-    setAttributes(newAttributes);
-  };
-
-  const generateMetadata = (e) => {
-    e.preventDefault();
-
+  const generateMetadata = () => {
     const metadata = {
       name,
-      bio,
       picture,
       coverPicture,
-      attributes,
     };
 
-    console.log("Generated metadata:", metadata);
+    return account(metadata);
   };
 
+  async function uplaodMetadata(metadata: AccountMetadata) {
+    const { uri } = await storageClient.uploadAsJson(metadata, {
+      acl: immutable(chains.testnet.id),
+    });
+
+    return uri;
+  }
+
+  async function submitForm(e) {
+    e.preventDefault();
+
+    const metadata = generateMetadata();
+    const metadataUri = await uplaodMetadata(metadata);
+    await updateAccountMetadata({
+      metadataUri,
+      walletClient,
+      sessionClient: onboardingUserSessionClient,
+    });
+
+    console.log("Account Metadata:", metadata);
+  }
+
   return (
-    <form
-      onSubmit={generateMetadata}
-      className="p-4 max-w-2xl mx-auto space-y-4"
-    >
+    <form onSubmit={submitForm} className="p-4 max-w-2xl mx-auto space-y-4">
       <h2 className="text-xl font-bold">Signup Form</h2>
 
       <input
@@ -53,13 +60,6 @@ export default function SignupForm() {
         onChange={(e) => setName(e.target.value)}
         className="w-full border p-2 rounded"
         required
-      />
-
-      <textarea
-        placeholder="Bio"
-        value={bio}
-        onChange={(e) => setBio(e.target.value)}
-        className="w-full border p-2 rounded"
       />
 
       <input
@@ -76,27 +76,11 @@ export default function SignupForm() {
         className="w-full border p-2 rounded"
       />
 
-      <div>
-        <h3 className="font-semibold mt-4">Attributes</h3>
-        {attributes.map((attr, index) => (
-          <div key={index} className="flex gap-2 my-2">
-            <label className="w-17">{attr.key.toUpperCase()}</label>
-            <input
-              placeholder="Value"
-              type={attr.type === "DATE" ? "date" : "text"}
-              value={attr.value}
-              onChange={(e) => handleAttributeChange(index, e.target.value)}
-              className="border p-2 rounded w-1/2"
-            />
-          </div>
-        ))}
-      </div>
-
       <button
         type="submit"
-        className="bg-green-600 text-white px-4 py-2 rounded"
+        className="bg-green-600 w-full text-white px-4 py-2 rounded"
       >
-        Generate Metadata
+        Signup
       </button>
     </form>
   );

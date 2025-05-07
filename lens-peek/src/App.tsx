@@ -10,7 +10,8 @@ import {
 
 import { setupOnboardingUser } from "./utils/users";
 import { client } from "./utils/client";
-import { fetchAppByTxHash, fetchAllUsers } from "./utils/app";
+import { AccountDetails } from "./utils/account";
+import { fetchAppByTxHash, fetchAllUsers, AppDetails } from "./utils/app";
 
 import type { SessionClient } from "@lens-protocol/client";
 
@@ -29,12 +30,10 @@ const App = () => {
   const account = useAccount();
   const { data: walletClient } = useWalletClient();
 
-  const [app, setApp] = useState<Object>({});
-  const [users, setUsers] = useState<Array<Object>>([]);
+  const [app, setApp] = useState<AppDetails>();
+  const [users, setUsers] = useState<AccountDetails[]>();
   const [showSignupForm, setShowSignupForm] = useState(false);
-  const [sessionClient, setSessionClient] = useState<SessionClient | null>(
-    null
-  ); // TODO: Use the storage something
+  const [sessionClient, setSessionClient] = useState<SessionClient>(); // TODO: Use the storage something
 
   async function listConnectedAddressAccounts() {
     if (!client || !walletClient) {
@@ -83,7 +82,7 @@ const App = () => {
     }
 
     try {
-      const user = await setupOnboardingUser({ cleint, walletClient });
+      const user = await setupOnboardingUser({ client, walletClient });
       if (user) setSessionClient(user); // error handled in the func
     } catch (error) {
       console.error("Error handling signup:", error);
@@ -126,7 +125,7 @@ const App = () => {
   return (
     <div>
       <ConnectKitButton />
-      {app.address && (
+      {app && (
         <div>
           <p>Address {app.address}</p>
           <p>CreatedAt {app.createdAt}</p>
@@ -141,18 +140,18 @@ const App = () => {
           <p>Url {app.metadata.url}</p>
           <p>NamespaceAddress {app.namespaceAddress}</p>
           <p>Owner {app.owner}</p>
-          <p>SponsorshipAddress {app.sponsorshipAddress | "Null"}</p>
-          <p>TreasuryAddress {app.treasuryAddress | "Null"}</p>
+          <p>SponsorshipAddress {app.sponsorshipAddress || "Null"}</p>
+          <p>TreasuryAddress {app.treasuryAddress || "Null"}</p>
           <p>VerificationEnabled {Boolean(app.verificationEnabled)}</p>
         </div>
       )}
-      {users.length > 0 && (
+      {users && (
         <ol>
-          users.map(function(item, idx)(
-          <li key={idx}>
-            {item.account} {item.lastActiveOn} {item.firstLoginOn}
-          </li>
-          ))
+          {users.map((item, idx) => (
+            <li key={idx}>
+              {item.account.name} {item.lastActiveOn} {item.firstLoginOn}
+            </li>
+          ))}
         </ol>
       )}
       <button
@@ -161,7 +160,12 @@ const App = () => {
       >
         Signup
       </button>
-      {showSignupForm && <SignupForm />}
+      {showSignupForm && (
+        <SignupForm
+          onboardingUserSessionClient?={sessionClient!} // TODO: is there walletClient inside sessionClient?
+          walletClient?={walletClient}
+        />
+      )}
     </div>
   );
 };
