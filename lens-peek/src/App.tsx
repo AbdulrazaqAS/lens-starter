@@ -3,9 +3,12 @@ import { useEffect, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 
 import { evmAddress } from "@lens-protocol/client";
-import { lastLoggedInAccount, fetchAccountsAvailable } from "@lens-protocol/client/actions";
+import {
+  lastLoggedInAccount,
+  fetchAccountsAvailable,
+} from "@lens-protocol/client/actions";
 
-import {setupOnboardingUser} from "./utils/users";
+import { setupOnboardingUser } from "./utils/users";
 import { client } from "./utils/client";
 import { fetchAppByTxHash, fetchAllUsers } from "./utils/app";
 
@@ -31,7 +34,7 @@ const App = () => {
   const [showSignupForm, setShowSignupForm] = useState(false);
   const [sessionClient, setSessionClient] = useState<SessionClient | null>(
     null
-  );  // TODO: Use the storage something
+  ); // TODO: Use the storage something
 
   async function listConnectedAddressAccounts() {
     if (!client || !walletClient) {
@@ -73,15 +76,15 @@ const App = () => {
     return result;
   }
 
-  async function handleSignup(){
-    if (!client || !walletClient){
+  async function handleSignup() {
+    if (!client || !walletClient) {
       console.error("Error handling signup");
       return;
     }
-    
+
     try {
-      const user = await setupOnboardingUser({cleint, walletClient});
-      if (user) setSessionClient(user);  // error handled in the func
+      const user = await setupOnboardingUser({ cleint, walletClient });
+      if (user) setSessionClient(user); // error handled in the func
     } catch (error) {
       console.error("Error handling signup:", error);
       return;
@@ -92,10 +95,10 @@ const App = () => {
     // if (!walletClient || !account.isConnected || sessionClient) return;
     if (!walletClient || !account.isConnected) return;
 
-      // setupOnboardingUser({client, walletClient}).then(async () => {
-      //   console.log("Session client loaded");
-      // });
-      // listConnectedAddressAccounts();
+    // setupOnboardingUser({client, walletClient}).then(async () => {
+    //   console.log("Session client loaded");
+    // });
+    // listConnectedAddressAccounts();
     // getLastLoggedInAccount();
 
     const info = {
@@ -123,7 +126,6 @@ const App = () => {
   return (
     <div>
       <ConnectKitButton />
-      <button className="bg-red-500" onClick={() => setShowSignupForm(!showSignupForm)}>Signup</button>
       {app.address && (
         <div>
           <p>Address {app.address}</p>
@@ -147,12 +149,18 @@ const App = () => {
       {users.length > 0 && (
         <ol>
           users.map(function(item, idx)(
-            <li key={idx}>
-              {item.account} {item.lastActiveOn} {item.firstLoginOn}
-            </li>
+          <li key={idx}>
+            {item.account} {item.lastActiveOn} {item.firstLoginOn}
+          </li>
           ))
         </ol>
       )}
+      <button
+        className="bg-blue-500 text-white px-3 py-1 rounded mt-5"
+        onClick={() => setShowSignupForm(!showSignupForm)}
+      >
+        Signup
+      </button>
       {showSignupForm && <SignupForm />}
     </div>
   );

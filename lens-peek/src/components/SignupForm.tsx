@@ -15,23 +15,20 @@ export default function SignupForm() {
   const [coverPicture, setCoverPicture] = useState("");
   const [attributes, setAttributes] = useState<Attribute[]>([
     { key: "twitter", type: "STRING", value: "https://twitter.com/" },
+    { key: "linkedin", type: "STRING", value: "https://linkedin.com/in/" },
     { key: "dob", type: "DATE", value: "" },
-    { key: "enabled", type: "BOOLEAN", value: "true" },
-    { key: "height", type: "NUMBER", value: "" },
     { key: "settings", type: "JSON", value: '{"theme": "dark"}' },
   ]);
 
-  const handleAttributeChange = (index: number, field: keyof Attribute, value: string) => {
+  const handleAttributeChange = (index: number, value: string) => {
     const newAttributes = [...attributes];
-    newAttributes[index][field] = value;
+    newAttributes[index]["value"] = value;
     setAttributes(newAttributes);
   };
 
-  const addAttribute = () => {
-    setAttributes([...attributes, { key: "", type: "STRING", value: "" }]);
-  };
+  const generateMetadata = (e) => {
+    e.preventDefault();
 
-  const generateMetadata = () => {
     const metadata = {
       name,
       bio,
@@ -41,11 +38,13 @@ export default function SignupForm() {
     };
 
     console.log("Generated metadata:", metadata);
-    alert("Metadata generated. Check console.");
   };
 
   return (
-    <div className="p-4 max-w-2xl mx-auto space-y-4">
+    <form
+      onSubmit={generateMetadata}
+      className="p-4 max-w-2xl mx-auto space-y-4"
+    >
       <h2 className="text-xl font-bold">Signup Form</h2>
 
       <input
@@ -53,6 +52,7 @@ export default function SignupForm() {
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="w-full border p-2 rounded"
+        required
       />
 
       <textarea
@@ -83,26 +83,21 @@ export default function SignupForm() {
             <label className="w-17">{attr.key.toUpperCase()}</label>
             <input
               placeholder="Value"
+              type={attr.type === "DATE" ? "date" : "text"}
               value={attr.value}
-              onChange={(e) => handleAttributeChange(index, "value", e.target.value)}
+              onChange={(e) => handleAttributeChange(index, e.target.value)}
               className="border p-2 rounded w-1/2"
             />
           </div>
         ))}
-        <button
-          onClick={addAttribute}
-          className="bg-blue-500 text-white px-3 py-1 rounded"
-        >
-          + Add Attribute
-        </button>
       </div>
 
       <button
-        onClick={generateMetadata}
+        type="submit"
         className="bg-green-600 text-white px-4 py-2 rounded"
       >
         Generate Metadata
       </button>
-    </div>
+    </form>
   );
 }

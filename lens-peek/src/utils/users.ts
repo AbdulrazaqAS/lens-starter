@@ -55,14 +55,15 @@ export async function setupBuilderUser({
 export async function setupAccountOwnerUser({
   client,
   walletClient,
-  account
+  accountAddr,
 }: {
   client: PublicClient;
   walletClient: WalletClient;
+  accountAddr: string;
 }) {
   const authenticated = await client.login({
     accountOwner: {
-      account: account,
+      account: evmAddress(accountAddr),
       app: APP_ADDRESS,
       owner: walletClient.account!.address,
     },
@@ -81,14 +82,15 @@ export async function setupAccountOwnerUser({
 export async function setupAccountManagerUser({
   client,
   walletClient,
-  account
+  accountAddr,
 }: {
   client: PublicClient;
   walletClient: WalletClient;
+  accountAddr: string;
 }) {
   const authenticated = await client.login({
     accountManager: {
-      account: account,
+      account: evmAddress(accountAddr),
       app: APP_ADDRESS,
       manager: walletClient.account!.address,
     },
