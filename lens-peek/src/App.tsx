@@ -11,6 +11,8 @@ import { fetchAppByTxHash, fetchAllUsers } from "./utils/app";
 
 import type { SessionClient } from "@lens-protocol/client";
 
+import SignupForm from "./components/SignupForm";
+
 const LensJobs_URI =
   "lens://50efa5c55fb75422540b9227067c97f706bfeeb3e1e46d24e322873a1f493450";
 const admins = [
@@ -26,6 +28,7 @@ const App = () => {
 
   const [app, setApp] = useState<Object>({});
   const [users, setUsers] = useState<Array<Object>>([]);
+  const [showSignupForm, setShowSignupForm] = useState(false);
   const [sessionClient, setSessionClient] = useState<SessionClient | null>(
     null
   );  // TODO: Use the storage something
@@ -77,7 +80,7 @@ const App = () => {
     }
     
     try {
-      cosnt user = await setupOnboardingUser({cleint, walletClient});
+      const user = await setupOnboardingUser({cleint, walletClient});
       if (user) setSessionClient(user);  // error handled in the func
     } catch (error) {
       console.error("Error handling signup:", error);
@@ -120,7 +123,7 @@ const App = () => {
   return (
     <div>
       <ConnectKitButton />
-      <button onClick={}>Signup</button>
+      <button className="bg-red-500" onClick={() => setShowSignupForm(!showSignupForm)}>Signup</button>
       {app.address && (
         <div>
           <p>Address {app.address}</p>
@@ -150,6 +153,7 @@ const App = () => {
           ))
         </ol>
       )}
+      {showSignupForm && <SignupForm />}
     </div>
   );
 };
