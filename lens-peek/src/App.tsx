@@ -154,9 +154,13 @@ const App = () => {
           <ol>
             {users.map((item, idx) => (
               <li key={idx} className="list-decimal">
-                Username: {item.account.username?.localname} Name:{" "}
-                {item.account.metadata?.name || "Null"} Pic:
-                {item.account.metadata?.picture || "Null"} Addr: ...
+                <img
+                  src={item.account.metadata?.picture}
+                  alt="Account pic"
+                  className="w-8 h-8 rounded-full mr-2 inline"
+                />
+                Username: {item.account.username?.localName || "Null"} Name:{" "}
+                {item.account.metadata?.name || "Null"} Addr: ...
                 {item.account.address.slice(37)} Owner: ...
                 {item.account.owner.slice(37)}
               </li>
