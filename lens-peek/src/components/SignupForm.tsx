@@ -32,6 +32,7 @@ export default function SignupForm({
 }: Props) {
   const [name, setName] = useState("");
   const [picture, setPicture] = useState<File>();
+  const [username, setUsername] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
   const generateMetadata = (pictureUri: string) => {
@@ -55,9 +56,12 @@ export default function SignupForm({
     e.preventDefault();
 
     if (!walletClient) {
+      console.error("Error:", new Error("Wallet not connected"));
       alert("Wallet not connected");
       return;
     }
+
+    // TODO: add fields checks
 
     let sessionClient = onboardingUserSessionClient;
 
@@ -68,6 +72,7 @@ export default function SignupForm({
         sessionClient = await createOnboardingSessionClient();
       }
 
+
       console.log("Session client", sessionClient);
       const pictureUri = await uplaodPicture(picture!);
       console.log("Picture Uri", pictureUri);
@@ -75,6 +80,7 @@ export default function SignupForm({
       const metadataUri = await uplaodMetadata(metadata);
       console.log("MetadataUri", metadataUri);
       const txHash = await createNewAccountWithUsername({
+        username,
         metadataUri,
         walletClient,
         sessionClient,
@@ -106,6 +112,15 @@ export default function SignupForm({
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        className="w-full border p-2 rounded"
+        required
+      />
+
+      {/* TODO: Implement already taken check. Use AI to suggest some possible ones */}
+      <input
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value.toLowerCase())}
         className="w-full border p-2 rounded"
         required
       />

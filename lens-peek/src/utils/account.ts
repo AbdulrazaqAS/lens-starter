@@ -24,16 +24,18 @@ export interface AccountDetails {
 }
 
 export async function createNewAccountWithUsername({
+  username,
   metadataUri,
   sessionClient,
   walletClient,
 }: {
+  username: string,
   metadataUri: string;
   sessionClient: SessionClient;
   walletClient: WalletClient;
 }) {
   const result = await createAccountWithUsername(sessionClient, {
-    username: { localName: "wagmi" },
+    username: { localName: username },
     metadataUri: uri(metadataUri),
   })
     .andThen(handleOperationWith(walletClient))

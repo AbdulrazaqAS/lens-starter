@@ -76,18 +76,19 @@ const App = () => {
 
   async function createOnboardingSessionClient() {
     if (!walletClient) {
+      console.error("Error:", new Error("Connect wallet"));
       alert("Connect wallet");
       return;
     }
 
     try {
       const user = await setupOnboardingUser({ client, walletClient });
-      if (user){
+      if (user) {
         setSessionClient(user);
         return user;
       }
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -153,8 +154,11 @@ const App = () => {
           <ol>
             {users.map((item, idx) => (
               <li key={idx} className="list-decimal">
-                Name: {item.account.name || "Null"} Pic:
-                {item.account.picture || "Null"}
+                Username: {item.account.username?.localname} Name:{" "}
+                {item.account.metadata?.name || "Null"} Pic:
+                {item.account.metadata?.picture || "Null"} Addr: ...
+                {item.account.address.slice(37)} Owner: ...
+                {item.account.owner.slice(37)}
               </li>
             ))}
           </ol>
