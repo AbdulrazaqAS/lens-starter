@@ -82,10 +82,12 @@ const App = () => {
 
     try {
       const user = await setupOnboardingUser({ client, walletClient });
-      if (user) setSessionClient(user); // error handled in the func
+      if (user){
+        setSessionClient(user);
+        return user;
+      }
     } catch (error) {
-      console.error("Error handling signup:", error);
-      return;
+      throw error
     }
   }
 

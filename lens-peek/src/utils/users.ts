@@ -21,8 +21,7 @@ export async function setupOnboardingUser({
   });
 
   if (authenticated.isErr()) {
-    console.error(authenticated.error);
-    return;
+    throw authenticated.error;
   }
 
   console.log("Onboarding user authenticated");
