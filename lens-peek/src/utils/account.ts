@@ -17,8 +17,26 @@ import {
 import { WalletClient } from "viem";
 import { handleOperationWith } from "@lens-protocol/client/viem";
 
+interface UsernameMetadata {
+  id: string;
+  linkedTo: string;
+  localName: string;
+  namespace: string;
+  ownedBy: string;
+  timestamp: string;
+  value: string;
+  __typename: string;
+}
+
+interface AccountMetadata {
+  metadata: AccountMetadataDetails;
+  username: UsernameMetadata;
+  address: string;
+  owner: string;
+}
+
 export interface AccountDetails {
-  account: AccountMetadataDetails;
+  account: AccountMetadata;
   lastActiveOn: DateTime;
   firstLoginOn: DateTime;
 }
@@ -29,7 +47,7 @@ export async function createNewAccountWithUsername({
   sessionClient,
   walletClient,
 }: {
-  username: string,
+  username: string;
   metadataUri: string;
   sessionClient: SessionClient;
   walletClient: WalletClient;
