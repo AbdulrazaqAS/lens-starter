@@ -37,7 +37,7 @@ export default function SignupForm({
   const generateMetadata = (pictureUri: string) => {
     const metadata = {
       name,
-      pictureUri,
+      picture: pictureUri,
     };
 
     return account(metadata);
@@ -68,6 +68,7 @@ export default function SignupForm({
         sessionClient = await createOnboardingSessionClient();
       }
 
+      console.log("Session client", sessionClient);
       const pictureUri = await uplaodPicture(picture!);
       console.log("Picture Uri", pictureUri);
       const metadata = generateMetadata(pictureUri);
