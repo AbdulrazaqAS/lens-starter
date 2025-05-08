@@ -50,9 +50,8 @@ const App = () => {
   }
 
   async function logOutAuthenticatedSession() {
-    // It says client has no logout, but may .mutation can be used together with GraphQL command.
-    // Check log out in Authentication page
-    // const result = await client.logout();
+    // Acct Owner and manager only
+    if (sessionClient) sessionClient.logout();
   }
 
   async function getLastLoggedInAccount() {
@@ -75,9 +74,9 @@ const App = () => {
     return result;
   }
 
-  async function handleSignup() {
-    if (!client || !walletClient) {
-      console.error("Error handling signup");
+  async function createOnboardingSessionClient() {
+    if (!walletClient) {
+      alert("Connect wallet");
       return;
     }
 
@@ -110,7 +109,6 @@ const App = () => {
 
   useEffect(() => {
     fetchAppByTxHash(client).then((app) => {
-      console.log("App", app);
       setApp(app);
     });
 
@@ -118,12 +116,12 @@ const App = () => {
       // items: Array<AppUser>: [{account: Account, lastActiveOn: DateTime, firstLoginOn: DateTime}, …]
       const { items, pageInfo } = result;
       setUsers(items);
-      console.log("All users:", items);
+      console.log("Users:", items);
     });
   }, []);
 
   return (
-    <div>
+    <div className="p-5 space-y-5">
       <ConnectKitButton />
       {app && (
         <div>
@@ -142,17 +140,23 @@ const App = () => {
           <p>Owner {app.owner}</p>
           <p>SponsorshipAddress {app.sponsorshipAddress || "Null"}</p>
           <p>TreasuryAddress {app.treasuryAddress || "Null"}</p>
-          <p>VerificationEnabled {Boolean(app.verificationEnabled)}</p>
+          <p>
+            VerificationEnabled {Boolean(app.verificationEnabled).toString()}
+          </p>
         </div>
       )}
       {users && (
-        <ol>
-          {users.map((item, idx) => (
-            <li key={idx}>
-              {item.account.name} {item.lastActiveOn} {item.firstLoginOn}
-            </li>
-          ))}
-        </ol>
+        <div>
+          <h2>Users ({users.length})</h2>
+          <ol>
+            {users.map((item, idx) => (
+              <li key={idx} className="list-decimal">
+                Name: {item.account.name || "Null"} Pic:
+                {item.account.picture || "Null"}
+              </li>
+            ))}
+          </ol>
+        </div>
       )}
       <button
         className="bg-blue-500 text-white px-3 py-1 rounded mt-5"
@@ -162,8 +166,9 @@ const App = () => {
       </button>
       {showSignupForm && (
         <SignupForm
-          onboardingUserSessionClient?={sessionClient!} // TODO: is there walletClient inside sessionClient?
-          walletClient?={walletClient}
+          onboardingUserSessionClient={sessionClient}
+          walletClient={walletClient}
+          createOnboardingSessionClient={createOnboardingSessionClient}
         />
       )}
     </div>

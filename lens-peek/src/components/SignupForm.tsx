@@ -3,26 +3,41 @@ import { AccountMetadata, account } from "@lens-protocol/metadata";
 import { storageClient } from "../utils/storage-client";
 import { immutable } from "@lens-chain/storage-client";
 import { chains } from "@lens-chain/sdk/viem";
-import { updateAccountMetadata } from "../utils/account";
-import { SessionClient } from "@lens-protocol/client";
+import {
+  switchToAccount,
+  createNewAccountWithUsername,
+  fetchAccountByTxHash,
+} from "../utils/account";
+import { Context, SessionClient } from "@lens-protocol/client";
 import { WalletClient } from "viem";
+
+type Props = {
+  onboardingUserSessionClient?: SessionClient<Context>;
+  walletClient?: WalletClient;
+  createOnboardingSessionClient: Function;
+};
+
+async function uplaodPicture(picture: File) {
+  const { uri } = await storageClient.uploadFile(picture, {
+    acl: immutable(chains.testnet.id),
+  });
+
+  return uri;
+}
 
 export default function SignupForm({
   walletClient,
   onboardingUserSessionClient,
-}: {
-  walletClient: WalletClient;
-  onboardingUserSessionClient: SessionClient;
-}) {
+  createOnboardingSessionClient,
+}: Props) {
   const [name, setName] = useState("");
-  const [picture, setPicture] = useState("");
-  const [coverPicture, setCoverPicture] = useState("");
+  const [picture, setPicture] = useState<File>();
+  const [isCreating, setIsCreating] = useState(false);
 
-  const generateMetadata = () => {
+  const generateMetadata = (pictureUri: string) => {
     const metadata = {
       name,
-      picture,
-      coverPicture,
+      pictureUri,
     };
 
     return account(metadata);
@@ -39,15 +54,47 @@ export default function SignupForm({
   async function submitForm(e) {
     e.preventDefault();
 
-    const metadata = generateMetadata();
-    const metadataUri = await uplaodMetadata(metadata);
-    await updateAccountMetadata({
-      metadataUri,
-      walletClient,
-      sessionClient: onboardingUserSessionClient,
-    });
+    if (!walletClient) {
+      alert("Wallet not connected");
+      return;
+    }
 
-    console.log("Account Metadata:", metadata);
+    let sessionClient = onboardingUserSessionClient;
+
+    try {
+      setIsCreating(true);
+
+      if (!sessionClient) {
+        sessionClient = await createOnboardingSessionClient();
+      }
+
+      const pictureUri = await uplaodPicture(picture!);
+      console.log("Picture Uri", pictureUri);
+      const metadata = generateMetadata(pictureUri);
+      const metadataUri = await uplaodMetadata(metadata);
+      console.log("MetadataUri", metadataUri);
+      const txHash = await createNewAccountWithUsername({
+        metadataUri,
+        walletClient,
+        sessionClient,
+      });
+      console.log("CreationTxHash", txHash);
+      const account = await fetchAccountByTxHash({
+        client: sessionClient,
+        trxHash: txHash,
+      });
+      console.log("Account", account);
+      const accountOwnerSessionClient = await switchToAccount({
+        sessionClient,
+        address: account?.address,
+      });
+
+      console.log("Account owner session client", accountOwnerSessionClient);
+    } catch (error) {
+      console.error("Error creating account:", error);
+    } finally {
+      setIsCreating(false);
+    }
   }
 
   return (
@@ -64,23 +111,19 @@ export default function SignupForm({
 
       <input
         placeholder="Picture URL"
-        value={picture}
-        onChange={(e) => setPicture(e.target.value)}
+        type="file"
+        accept="image/*"
+        // value={picture?.name}
+        onChange={(e) => setPicture(e.target.files![0])}
         className="w-full border p-2 rounded"
-      />
-
-      <input
-        placeholder="Cover Picture URL"
-        value={coverPicture}
-        onChange={(e) => setCoverPicture(e.target.value)}
-        className="w-full border p-2 rounded"
+        required
       />
 
       <button
         type="submit"
         className="bg-green-600 w-full text-white px-4 py-2 rounded"
       >
-        Signup
+        {isCreating ? "Creating account..." : "Signup"}
       </button>
     </form>
   );
